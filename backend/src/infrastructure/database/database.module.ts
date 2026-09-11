@@ -11,7 +11,11 @@ import { PG_POOL } from './database.constants';
       provide: PG_POOL,
       useFactory: async (configService: ConfigService) => {
         const pool = new Pool({
-          connectionString: configService.get<string>('DATABASE_URL'),
+          host: 'localhost',
+          port: 5432,
+          user: configService.get<string>('POSTGRES_USER'),
+          password: configService.get<string>('POSTGRES_PASSWORD'),
+          database: configService.get<string>('POSTGRES_DB'),
         });
         await pool.connect();
         return pool;
