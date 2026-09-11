@@ -9,21 +9,20 @@ import { PG_POOL } from './database.constants';
   providers: [
     {
       provide: PG_POOL,
-      useFactory: async (configService: ConfigService) => {
+      useFactory: (configService: ConfigService) => {
         const pool = new Pool({
-          host: 'localhost',
-          port: 5432,
+          host: configService.get<string>('POSTGRES_HOST'),
+          port: configService.get<number>('POSTGRES_PORT'),
           user: configService.get<string>('POSTGRES_USER'),
           password: configService.get<string>('POSTGRES_PASSWORD'),
           database: configService.get<string>('POSTGRES_DB'),
         });
-        await pool.connect();
         return pool;
       },
       inject: [ConfigService],
     },
     DatabaseService,
   ],
-  exports: ['PG_POOL', DatabaseService],
+  exports: [PG_POOL, DatabaseService],
 })
 export class DatabaseModule {}

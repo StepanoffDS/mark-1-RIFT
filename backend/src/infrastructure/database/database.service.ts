@@ -6,6 +6,10 @@ import { PG_POOL } from './database.constants';
 export class DatabaseService implements OnModuleDestroy {
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
+  query(text: string, values?: unknown[]) {
+    return this.pool.query(text, values);
+  }
+
   async onModuleDestroy() {
     await this.pool.end();
   }
