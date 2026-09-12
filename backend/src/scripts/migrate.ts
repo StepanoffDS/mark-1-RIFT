@@ -1,5 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises';
-import { resolve, join } from 'node:path';
+import { join, resolve } from 'node:path';
+
 import { Pool } from 'pg';
 
 const migrationsDir = resolve(

@@ -2,6 +2,10 @@
 
 Frontend RIFT построен на **Next.js App Router**, React и TypeScript.
 
+Авторизация использует `HttpOnly` cookies: frontend не хранит JWT или refresh
+token в `localStorage`, Zustand и TanStack Query. Правила refresh, CSRF и
+обработки `401`: [auth.md](auth.md).
+
 Основной подход — Feature-Sliced Design, адаптированный под App Router.
 
 ## Структура

@@ -249,6 +249,10 @@ Persistent business data не хранится только в Redis.
 
 PostgreSQL остаётся source of truth.
 
+Refresh-сессии авторизации также хранятся в PostgreSQL; Redis обслуживает
+только rate limit и другое временное распределённое состояние. Полный
+контракт: [auth.md](auth.md).
+
 ---
 
 # WebSocket
@@ -387,8 +391,11 @@ config/
 ```text
 DATABASE_URL
 REDIS_URL
-JWT_SECRET
-JWT_EXPIRES_IN
+JWT_ACCESS_SECRET
+JWT_ISSUER
+JWT_AUDIENCE
+ACCESS_TOKEN_TTL
+REFRESH_SESSION_TTL
 ```
 
 Приложение должно завершать запуск с ошибкой, если обязательная конфигурация отсутствует.

@@ -1,13 +1,19 @@
+import { resolve } from 'node:path';
+
 import { Module } from '@nestjs/common';
-
 import { ConfigModule } from '@nestjs/config';
-import { DatabaseModule } from './infrastructure/database/database.module';
-import { HealthController } from './health.controller';
 
+import { HealthController } from './health.controller';
+import { DatabaseModule } from './infrastructure/database/database.module';
+import { AuthModule } from './modules/auth/auth.module';
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '../.env' }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: resolve(__dirname, '../../.env'),
+    }),
     DatabaseModule,
+    AuthModule,
   ],
   controllers: [HealthController],
   providers: [],

@@ -12,6 +12,9 @@ API разделяется на HTTP API и Socket.IO events.
 
 # Auth
 
+Полный lifecycle credentials, refresh rotation, CSRF и cookie attributes:
+[auth.md](auth.md).
+
 ## `POST /auth/register`
 
 Регистрация.
@@ -49,23 +52,26 @@ Response:
 200 OK
 ```
 
-Access/refresh credentials должны передаваться безопасным способом; для браузерного клиента предпочтительны `HttpOnly`, `Secure`, `SameSite` cookies.
+Backend выставляет access и refresh credentials только через `HttpOnly`,
+`Secure`, `SameSite=Strict` cookies. Credentials не возвращаются в JSON.
+Небезопасные запросы требуют `X-CSRF-Token` и валидный `Origin`.
 
 ---
 
 ## `POST /auth/refresh`
 
-Обновление access token.
+Ротация refresh token и обновление access token. Refresh token одноразовый;
+повторное предъявление отзывает сессию.
 
 ```text
-200 OK
+204 No Content
 ```
 
 ---
 
 ## `POST /auth/logout`
 
-Завершает текущую сессию.
+Отзывает текущую PostgreSQL-сессию и очищает auth cookies.
 
 ```text
 204 No Content

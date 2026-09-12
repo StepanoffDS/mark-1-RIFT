@@ -1,4 +1,5 @@
 import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
+
 import { DatabaseService } from './infrastructure/database/database.service';
 
 @Controller('health')

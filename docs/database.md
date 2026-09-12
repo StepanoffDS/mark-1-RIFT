@@ -70,7 +70,8 @@ ON users(username);
 
 # sessions
 
-Refresh-сессии пользователей.
+Refresh-сессии пользователей. PostgreSQL — source of truth для сессий;
+Redis используется только для временного rate limit и realtime-state.
 
 | Column             | Type        | Constraints             |
 | ------------------ | ----------- | ----------------------- |
@@ -79,13 +80,19 @@ Refresh-сессии пользователей.
 | refresh_token_hash | TEXT        | NOT NULL                |
 | expires_at         | TIMESTAMPTZ | NOT NULL                |
 | created_at         | TIMESTAMPTZ | NOT NULL                |
+| last_used_at       | TIMESTAMPTZ | NOT NULL                |
 | revoked_at         | TIMESTAMPTZ | NULL                    |
+| user_agent         | TEXT        | NULL                    |
 
 Relation:
 
 ```text
 users 1 ─── N sessions
 ```
+
+`refresh_token_hash` содержит только Argon2id-хеш случайной части refresh
+cookie. Исходный token не сохраняется и не возвращается API. Нужен индекс по
+`user_id`; устаревшие сессии очищаются по `expires_at`.
 
 ---
 

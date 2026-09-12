@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
-import { DatabaseService } from './database.service';
+
 import { PG_POOL } from './database.constants';
+import { DatabaseService } from './database.service';
 
 @Module({
   imports: [ConfigModule],

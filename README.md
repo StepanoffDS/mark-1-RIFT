@@ -77,6 +77,8 @@ Next.js используется не только как SPA-обёртка. О
 
 Работа с PostgreSQL выполняется напрямую через SQL-запросы.
 
+Правила авторизации для frontend и backend: [docs/auth.md](docs/auth.md).
+
 Это позволяет работать напрямую с:
 
 * `JOIN`;
@@ -142,10 +144,12 @@ Redis используется для временного и распредел
 presence
 typing indicators
 cache
-sessions
 rate limiting
 Socket.IO Pub/Sub
 ```
+
+Refresh-сессии пользователей хранятся в PostgreSQL. Redis не является
+хранилищем credentials.
 
 Например:
 
