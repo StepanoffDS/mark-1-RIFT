@@ -3,11 +3,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 
 import { DatabaseModule } from '../../infrastructure/database/database.module';
+import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { CsrfGuard } from './guards/csrf.guard';
 import { PasswordService } from './password.service';
 import { SessionsRepository } from './sessions.repository';
 import { UsersRepository } from './users.repository';
-import { AuthController } from './auth.controller';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AuthController } from './auth.controller';
     UsersRepository,
     SessionsRepository,
     AuthService,
+    CsrfGuard,
   ],
 })
 export class AuthModule {}

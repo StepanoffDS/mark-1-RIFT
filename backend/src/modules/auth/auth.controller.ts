@@ -3,31 +3,39 @@ import { randomBytes } from 'node:crypto';
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { getRefreshSessionTtlMs, isProduction } from 'src/config/app-env';
+import { RequestWithCookies } from 'src/config/types';
 
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { CsrfGuard } from './guards/csrf.guard';
+import { getAuthCookieName } from './lib/auth-cookie';
 import { AuthCookie, type Credentials } from './types';
 
-type RequestWithCookies = Request & {
-  cookies: Record<string, string | undefined>;
-};
-
+@UseGuards(CsrfGuard)
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {}
+
+  @Get('csrf')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  csrf(@Res({ passthrough: true }) response: Response) {
+    this.setCsrfCookie(response);
+  }
 
   @Post('register')
   async register(
@@ -69,7 +77,9 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const credentials = await this.authService.refresh(
-      request.cookies[this.cookieName(AuthCookie.Refresh)] ?? '',
+      request.cookies[
+        getAuthCookieName(this.configService, AuthCookie.Refresh)
+      ] ?? '',
     );
 
     this.setCredentials(response, credentials);
@@ -82,20 +92,21 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     await this.authService.logout(
-      request.cookies[this.cookieName(AuthCookie.Refresh)] ?? '',
+      request.cookies[
+        getAuthCookieName(this.configService, AuthCookie.Refresh)
+      ] ?? '',
     );
 
     this.clearCredentials(response);
   }
 
   private setCredentials(response: Response, credentials: Credentials) {
-    const secure = isProduction(this.configService);
     const refreshMaxAge = getRefreshSessionTtlMs(this.configService);
 
     response.setHeader('Cache-Control', 'no-store');
 
     response.cookie(
-      this.cookieName(AuthCookie.Access),
+      getAuthCookieName(this.configService, AuthCookie.Access),
       credentials.accessToken,
       {
         ...this.cookieOptions(true),
@@ -107,7 +118,7 @@ export class AuthController {
     );
 
     response.cookie(
-      this.cookieName(AuthCookie.Refresh),
+      getAuthCookieName(this.configService, AuthCookie.Refresh),
       credentials.refreshToken,
       {
         ...this.cookieOptions(true),
@@ -115,13 +126,16 @@ export class AuthController {
       },
     );
 
+    this.setCsrfCookie(response);
+  }
+
+  private setCsrfCookie(response: Response) {
     response.cookie(
-      this.cookieName(AuthCookie.Csrf),
+      getAuthCookieName(this.configService, AuthCookie.Csrf),
       randomBytes(32).toString('base64url'),
       {
         ...this.cookieOptions(false),
-        maxAge: refreshMaxAge,
-        secure,
+        maxAge: getRefreshSessionTtlMs(this.configService),
       },
     );
   }
@@ -131,7 +145,7 @@ export class AuthController {
 
     for (const name of Object.values(AuthCookie)) {
       response.clearCookie(
-        this.cookieName(name),
+        getAuthCookieName(this.configService, name),
         this.cookieOptions(name !== AuthCookie.Csrf),
       );
     }
@@ -144,11 +158,5 @@ export class AuthController {
       sameSite: 'strict' as const,
       path: '/',
     };
-  }
-
-  private cookieName(name: AuthCookie) {
-    return isProduction(this.configService)
-      ? `__Host-rift_${name}`
-      : `rift_${name}`;
   }
 }
