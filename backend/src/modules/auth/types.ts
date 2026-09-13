@@ -1,3 +1,5 @@
+import type { RequestWithCookies } from 'src/config/types';
+
 export type Credentials = {
   accessToken: string;
   refreshToken: string;
@@ -8,3 +10,12 @@ export enum AuthCookie {
   Refresh = 'refresh',
   Csrf = 'csrf',
 }
+
+export type AccessTokenPayload = {
+  sub: string;
+  sid: string;
+};
+
+export type AuthenticatedRequest = RequestWithCookies & {
+  user: AccessTokenPayload;
+};
