@@ -1,5 +1,3 @@
-import { resolve } from 'node:path';
-
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
@@ -10,7 +8,6 @@ import { AuthModule } from './modules/auth/auth.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: resolve(__dirname, '../../.env'),
     }),
     DatabaseModule,
     AuthModule,
