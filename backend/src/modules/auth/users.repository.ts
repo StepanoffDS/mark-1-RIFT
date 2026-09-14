@@ -41,4 +41,15 @@ export class UsersRepository {
 
     return result.rows[0] as UserRow;
   }
+
+  async findById(id: string): Promise<UserRow | null> {
+    const result = await this.databaseService.query(
+      `SELECT id, email, username
+       FROM users
+       WHERE id = $1`,
+      [id],
+    );
+
+    return (result.rows[0] as UserRow | undefined) ?? null;
+  }
 }

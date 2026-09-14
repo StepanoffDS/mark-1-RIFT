@@ -10,6 +10,14 @@ type SessionRow = {
   revoked_at: Date | null;
 };
 
+type UserSessionRow = {
+  id: string;
+  user_agent: string | null;
+  created_at: Date;
+  last_used_at: Date;
+  expires_at: Date;
+};
+
 @Injectable()
 export class SessionsRepository {
   constructor(private readonly databaseService: DatabaseService) {}
@@ -65,6 +73,31 @@ export class SessionsRepository {
        SET revoked_at = now()
        WHERE id = $1 AND revoked_at IS NULL`,
       [sessionId],
+    );
+  }
+
+  async findActiveByUserId(userId: string): Promise<UserSessionRow[]> {
+    const result = await this.databaseService.query(
+      `SELECT id, user_agent, created_at, last_used_at, expires_at
+       FROM sessions
+       WHERE user_id = $1
+         AND revoked_at IS NULL
+         AND expires_at > now()
+       ORDER BY last_used_at DESC`,
+      [userId],
+    );
+
+    return result.rows as UserSessionRow[];
+  }
+
+  async revokeByIdAndUserId(sessionId: string, userId: string) {
+    await this.databaseService.query(
+      `UPDATE sessions
+       SET revoked_at = now()
+       WHERE id = $1
+       AND user_id = $2
+       AND revoked_at IS NULL`,
+      [sessionId, userId],
     );
   }
 }

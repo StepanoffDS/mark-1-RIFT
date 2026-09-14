@@ -5,9 +5,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { DatabaseModule } from '../../infrastructure/database/database.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { AccessTokenGuard } from './guards/access-token.guard';
 import { CsrfGuard } from './guards/csrf.guard';
 import { PasswordService } from './password.service';
 import { SessionsRepository } from './sessions.repository';
+import { UsersController } from './users.controller';
 import { UsersRepository } from './users.repository';
 
 @Module({
@@ -25,13 +27,14 @@ import { UsersRepository } from './users.repository';
       }),
     }),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, UsersController],
   providers: [
     PasswordService,
     UsersRepository,
     SessionsRepository,
     AuthService,
     CsrfGuard,
+    AccessTokenGuard,
   ],
 })
 export class AuthModule {}
