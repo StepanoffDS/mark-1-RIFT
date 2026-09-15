@@ -3,6 +3,8 @@ import { join, resolve } from 'node:path';
 
 import { Pool } from 'pg';
 
+process.loadEnvFile(process.env.NODE_ENV === 'test' ? '.env.test' : '.env');
+
 const migrationsDir = resolve(
   __dirname,
   '../infrastructure/database/migrations',
