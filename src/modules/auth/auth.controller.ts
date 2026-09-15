@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { getRefreshSessionTtlMs, isProduction } from 'src/config/app-env';
 import { RequestWithCookies } from 'src/config/types';
@@ -38,6 +39,8 @@ export class AuthController {
   }
 
   @Post('register')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 3, ttl: 3_600_000 } })
   async register(
     @Body() dto: RegisterDto,
     @Req() request: RequestWithCookies,
@@ -55,6 +58,8 @@ export class AuthController {
   }
 
   @Post('login')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 900_000 } })
   async login(
     @Body() dto: LoginDto,
     @Req() request: RequestWithCookies,
@@ -71,6 +76,8 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
   @HttpCode(HttpStatus.NO_CONTENT)
   async refresh(
     @Req() request: RequestWithCookies,
@@ -86,6 +93,8 @@ export class AuthController {
   }
 
   @Post('logout')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(
     @Req() request: RequestWithCookies,
